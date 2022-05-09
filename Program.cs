@@ -15,16 +15,12 @@ namespace UniversityStructure
 {
     public class Program
     {
-        public Program()
-        {
-        }
-
         public static void Main(string[] args)
         {
             using (var context = new UniversityContext())
 
             {
-                var departmentId = Guid.Parse("66DE5E00-B45A-4031-8C1E-CDDD01C47BE8");
+                var departmentId = Guid.Parse("A2631790-B39A-4965-B2E0-FDFCE4106B73");
                 DbPrimaryDataCreated(context);
                 ShowStudents(context, departmentId); //6 užduotis - - per Department ID atvaizduojami esami studentai
 
@@ -37,19 +33,49 @@ namespace UniversityStructure
 
                 // AddNewLectureToAnExistingDepartment(context, "Ethics", departmentId); 
                 // AddNewStudentToAnExistingDepartment(context, "Danas", "Martisius", departmentId);
-                AddExistingStudentToExistingLectures(context, studentId, Guid.Parse("B3969361-EA40-4B23-8797-859D66EE5E20"));
-
+                // AddExistingStudentToExistingLectures(context, studentId, Guid.Parse("B3969361-EA40-4B23-8797-859D66EE5E20")); Jau egzistuojančiam studentui priskiriama egzistuojanti paskaita
+                //AddANewDepartment(context, "International Politics and Diplomacy");
+                //ChangeDepartments(context, Guid.Parse("7C0DF916-E075-485B-8971-EF1F19C56BBB"), Guid.Parse("A2631790-B39A-4965-B2E0-FDFCE4106B73")) ;
+                AddAnExistingLectureToAnExistingDepartment(context,Guid.Parse("B6030589-C542-4205-BCF8-6B21D8B06C15"), Guid.Parse("A2631790-B39A-4965-B2E0-FDFCE4106B73"));
 
             }
         }
 
-        private static void AddANewDepartment(UniversityContext context, string title) //1 užduotis -- sukuriame metodą naujam custom departamentui pridėti
+        //1 užduotis -- sukuriame metodą naujam custom departamentui pridėti
+        private static void AddANewDepartment(UniversityContext context, string title) 
         {
             var addedDepartment = new Department(title);
+            context.Departments.Add(addedDepartment);
+          
+          
             context.SaveChanges();
 
         }
 
+        private static void AddAnExistingLectureToAnExistingDepartment(UniversityContext context, Guid lectureId, Guid departmentId)
+        {
+            var addedExistingLectureToAnExistingDepartment = context.Lectures.FirstOrDefault(x => x.Id == lectureId);
+            if (addedExistingLectureToAnExistingDepartment == null)
+            {
+                Console.WriteLine("This lecture was not found");
+                return;
+            }
+
+            var existingDepartmentAddInto = context.Departments.FirstOrDefault(x => x.Id == departmentId);
+            if (existingDepartmentAddInto == null)
+            {
+                Console.WriteLine("This department was not found");
+                    return;
+            }
+
+            existingDepartmentAddInto.Lectures.Add(addedExistingLectureToAnExistingDepartment);
+            context.SaveChanges();
+
+        }
+
+
+
+        //3. Sukurti paskaitą ir ją priskirti prie departamento.
         private static void AddNewLectureToAnExistingDepartment(UniversityContext context, string subject, Guid departmentId) // Metodas pridėti naują paskaitą į esantį departamentą
         {
             var addedLecture = new Lecture(subject);
@@ -70,7 +96,9 @@ namespace UniversityStructure
 
         }
 
-        private static void AddNewStudentToAnExistingDepartment(UniversityContext context, string name, string surname, Guid departmentId) //Metodas pridėti naują studentą į departamentą
+        //2. Pridėti studentus/paskaitas į jau egzistuojantį departamentą.
+
+        private static void AddNewStudentToAnExistingDepartment(UniversityContext context, string name, string surname, Guid departmentId) //Metodas pridėti naują studentą į esantį departamentą
         {
             var addedStudent = new Student(name, surname);
             context.Students.Add(addedStudent);
@@ -89,7 +117,7 @@ namespace UniversityStructure
 
         }
 
-        private static void AddExistingStudentToExistingLectures(UniversityContext context, Guid studentId, Guid lectureId) //Kad suradus esamus studentus ir esamas paskaitas būtų galima susieti
+        private static void AddExistingStudentToExistingLectures(UniversityContext context, Guid studentId, Guid lectureId) //Metodas, kad suradus esamus studentus ir esamas paskaitas būtų galima susieti
         {
             
             
@@ -112,6 +140,8 @@ namespace UniversityStructure
             context.SaveChanges();
         }
 
+
+    
 
         private static void DbPrimaryDataCreated(UniversityContext context)
         {
@@ -138,7 +168,27 @@ namespace UniversityStructure
 
         }
 
-        private static void ShowStudents(UniversityContext context, Guid departmentId)
+        // 5. Perkelti studentą į kitą departamentą(bonus points jei pakeičiamos ir jo paskaitos).
+
+    
+
+        private static void ChangeDepartments(UniversityContext context, Guid studentId, Guid departmentIdToAdd)
+        {
+           var exchangeStudent = context.Students.FirstOrDefault(x=>x.Id == studentId);
+            if (exchangeStudent == null)
+            {
+                Console.WriteLine("This student was not found");
+                return;
+            }
+
+            exchangeStudent.DepartmentId = departmentIdToAdd;
+
+            context.SaveChanges();
+        }
+
+        // 6. Atvaizduoti visus departamento studentus.
+
+        private static void ShowStudents(UniversityContext context, Guid departmentId) //Parodomi departamento studentai juos radus per departamento ID
         {
             var department = context.Departments.Include("Students").FirstOrDefault(x => x.Id == departmentId);
             if (department == null)
@@ -156,7 +206,9 @@ namespace UniversityStructure
             }
         }
 
-        private static void ShowLectures(UniversityContext context, Guid departmentId)
+        // 7. Atvaizduoti visas departamento paskaitas.
+
+        private static void ShowLectures(UniversityContext context, Guid departmentId) //Parodomos departamento paskaitos radus jas per departamento ID
         {
             var department = context.Departments.Include("Lectures").FirstOrDefault(x => x.Id == departmentId);
             if (department == null)
@@ -175,8 +227,8 @@ namespace UniversityStructure
 
 
         }
-
-        private static void ShowLecturesOfStudents(UniversityContext context, Guid studentId)
+        // 8. Atvaizduoti visas paskaitas pagal studentą.
+        private static void ShowLecturesOfStudents(UniversityContext context, Guid studentId) // Metodas studento paskaitoms parodyti
         {
             var student = context.Students.Include("Lectures").FirstOrDefault(x => x.Id == studentId);
             if (student == null)
