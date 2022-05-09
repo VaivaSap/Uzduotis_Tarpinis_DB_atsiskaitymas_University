@@ -20,23 +20,27 @@ namespace UniversityStructure
             using (var context = new UniversityContext())
 
             {
-                var departmentId = Guid.Parse("A2631790-B39A-4965-B2E0-FDFCE4106B73");
                 DbPrimaryDataCreated(context);
+                var departmentId = context.Departments.First().Id;
                 ShowStudents(context, departmentId); //6 užduotis - - per Department ID atvaizduojami esami studentai
 
                 ShowLectures(context, departmentId); //7 Užduotis - - per Department ID atvaizduojamos paskaitos
 
 
-                var studentId = Guid.Parse("E1A76FAC-2B8B-439B-810C-EAE50C431D85");
+                var studentId = context.Students.First().Id;
                 ShowLecturesOfStudents(context, studentId); //8 užduotis - - atvaizduoti visas studento paskaitas 
 
 
-                // AddNewLectureToAnExistingDepartment(context, "Ethics", departmentId); 
-                // AddNewStudentToAnExistingDepartment(context, "Danas", "Martisius", departmentId);
-                // AddExistingStudentToExistingLectures(context, studentId, Guid.Parse("B3969361-EA40-4B23-8797-859D66EE5E20")); Jau egzistuojančiam studentui priskiriama egzistuojanti paskaita
-                //AddANewDepartment(context, "International Politics and Diplomacy");
-                //ChangeDepartments(context, Guid.Parse("7C0DF916-E075-485B-8971-EF1F19C56BBB"), Guid.Parse("A2631790-B39A-4965-B2E0-FDFCE4106B73")) ;
-                AddAnExistingLectureToAnExistingDepartment(context,Guid.Parse("B6030589-C542-4205-BCF8-6B21D8B06C15"), Guid.Parse("A2631790-B39A-4965-B2E0-FDFCE4106B73"));
+                var lectureId = context.Lectures.Skip(1).First().Id;
+
+                AddNewLectureToAnExistingDepartment(context, "Ethics", departmentId); 
+                AddNewStudentToAnExistingDepartment(context, "Danas", "Martisius", departmentId);
+                AddExistingStudentToExistingLectures(context, studentId, lectureId); //Jau egzistuojančiam studentui priskiriama egzistuojanti paskaita
+                AddANewDepartment(context, "International Politics and Diplomacy");
+
+                var department2Id = context.Departments.Skip(1).First().Id;
+                ChangeDepartments(context, studentId, department2Id) ;
+                AddAnExistingLectureToAnExistingDepartment(context, lectureId, department2Id);
 
             }
         }
